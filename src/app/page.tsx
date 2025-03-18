@@ -4,26 +4,36 @@ import React, { useState } from 'react';
 export default function Home() {
   const [potencia, setPotencia] = useState('');
   const [horas, setHoras] = useState('');
+  const [minutos, setMinutos] = useState('');
   const [dias, setDias] = useState('');
   const [precoKwh, setPrecoKwh] = useState<string>('');
   const [resultado, setResultado] = useState<number | null>(null);
   const [custoTotal, setCustoTotal] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [tempoUnidade, setTempoUnidade] = useState('horas'); // 'horas' ou 'minutos'
 
   const calcularGasto = () => {
     const potenciaNum = parseFloat(potencia);
     const horasNum = parseFloat(horas);
+    const minNum = parseFloat(minutos);
     const diasNum = parseFloat(dias);
     const precoKwhNum = parseFloat(precoKwh);
 
-    if (isNaN(potenciaNum) || isNaN(horasNum) || isNaN(diasNum) || isNaN(precoKwhNum)) {
+    if (isNaN(potenciaNum) || isNaN(horasNum) || isNaN(minNum) || isNaN(diasNum) || isNaN(precoKwhNum)) {
       setErro('Por favor, insira números válidos em todos os campos.');
       return;
     }
 
-    setErro(null); // Limpa mensagens de erro anteriores
+    setErro(null);
 
-    const consumo = (potenciaNum * horasNum * diasNum) / 1000;
+    let tempoTotalHoras = 0;
+    if (tempoUnidade === 'horas') {
+      tempoTotalHoras = horasNum;
+    } else {
+      tempoTotalHoras = minNum / 60;
+    }
+
+    const consumo = (potenciaNum * tempoTotalHoras * diasNum) / 1000;
     const custo = consumo * precoKwhNum;
     setResultado(parseFloat(consumo.toFixed(2)));
     setCustoTotal(custo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
@@ -44,14 +54,28 @@ export default function Home() {
               className="mt-1 p-2 w-full border rounded-md"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Horas de Uso por Dia:</label>
+          <div className="flex items-center">
+            <label className="block text-sm font-medium text-gray-700 mr-2">Tempo de Uso:</label>
             <input
               type="number"
-              value={horas}
-              onChange={(e) => setHoras(e.target.value)}
-              className="mt-1 p-2 w-full border rounded-md"
+              value={tempoUnidade === 'horas' ? horas : minutos}
+              onChange={(e) => {
+                if (tempoUnidade === 'horas') {
+                  setHoras(e.target.value);
+                } else {
+                  setMinutos(e.target.value);
+                }
+              }}
+              className="mt-1 p-2 w-1/2 border rounded-md"
             />
+            <select
+              value={tempoUnidade}
+              onChange={(e) => setTempoUnidade(e.target.value)}
+              className="mt-1 p-2 w-1/2 border rounded-md ml-2"
+            >
+              <option value="horas">Horas</option>
+              <option value="minutos">Minutos</option>
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Dias de Uso no Mês:</label>
