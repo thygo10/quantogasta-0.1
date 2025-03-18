@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FaBolt, FaClock, FaCalendarAlt, FaMoneyBillWave, FaSun, FaMoon } from 'react-icons/fa';
 
 export default function Home() {
-  // Ajuste os tipos para corresponder aos valores que você armazena
+  // Ajuste os tipos para corresponder aos valores que você salva / armazena
   const [potencia, setPotencia] = useState<string>('');
   const [horas, setHoras] = useState<string>('');
   const [minutos, setMinutos] = useState<string>('');
