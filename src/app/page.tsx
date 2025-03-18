@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { FaBolt, FaClock, FaCalendarAlt, FaMoneyBillWave, FaSun, FaMoon } from 'react-icons/fa';
 
 export default function Home() {
   const [potencia, setPotencia] = useState('');
@@ -10,7 +11,26 @@ export default function Home() {
   const [resultado, setResultado] = useState<number | null>(null);
   const [custoTotal, setCustoTotal] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
-  const [tempoUnidade, setTempoUnidade] = useState('horas'); // 'horas' ou 'minutos'
+  const [tempoUnidade, setTempoUnidade] = useState('horas');
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.theme = 'dark';
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.theme = 'light';
+    }
+  }, [darkMode]);
 
   const calcularGasto = () => {
     const potenciaNum = parseFloat(potencia);
@@ -40,56 +60,87 @@ export default function Home() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-semibold mb-4 text-center">Cálculo de Gasto de Energia</h2>
+    <div className={`flex items-center justify-center min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'}`}>
+      <div className={`bg-white p-8 rounded shadow-md w-full max-w-md ${darkMode ? 'dark:bg-gray-800' : ''}`}>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-semibold text-center">Cálculo de Gasto de Energia</h2>
+          <button onClick={() => setDarkMode(!darkMode)}>
+            {darkMode ? <FaSun className="text-yellow-500 text-xl" /> : <FaMoon className="text-gray-500 text-xl" />}
+          </button>
+        </div>
         <div className="space-y-4">
           {erro && <p className="text-red-500">{erro}</p>}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Potência (Watts):</label>
+            <div className="flex items-center mb-1">
+              <FaBolt className="mr-2 text-gray-500" />
+              <label htmlFor="potencia" className="block text-sm font-medium text-gray-700">Potência (Watts):</label>
+            </div>
             <input
               type="number"
+              id="potencia"
               value={potencia}
               onChange={(e) => setPotencia(e.target.value)}
-              className="mt-1 p-2 w-full border rounded-md"
+              className={`mt-1 p-2 w-full border rounded-md ${darkMode ? 'dark:bg-gray-700 dark:border-gray-600' : ''}`}
+              placeholder="Ex: 100"
             />
-          </div>
-          <div className="flex items-center">
-            <label className="block text-sm font-medium text-gray-700 mr-2">Tempo de Uso:</label>
-            <input
-              type="number"
-              value={tempoUnidade === 'horas' ? horas : minutos}
-              onChange={(e) => {
-                if (tempoUnidade === 'horas') {
-                  setHoras(e.target.value);
-                } else {
-                  setMinutos(e.target.value);
-                }
-              }}
-              className="mt-1 p-2 w-1/2 border rounded-md"
-            />
-            <select
-              value={tempoUnidade}
-              onChange={(e) => setTempoUnidade(e.target.value)}
-              className="mt-1 p-2 w-1/2 border rounded-md ml-2"
-            >
-              <option value="horas">Horas</option>
-              <option value="minutos">Minutos</option>
-            </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Dias de Uso no Mês:</label>
+            <div className="flex items-center mb-1">
+              <FaClock className="mr-2 text-gray-500" />
+              <label htmlFor="tempoUso" className="block text-sm font-medium text-gray-700">Tempo de Uso:</label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="number"
+                id="tempoUso"
+                value={tempoUnidade === 'horas' ? horas : minutos}
+                onChange={(e) => {
+                  if (tempoUnidade === 'horas') {
+                    setHoras(e.target.value);
+                  } else {
+                    setMinutos(e.target.value);
+                  }
+                }}
+                className={`mt-1 p-2 w-1/2 border rounded-md ${darkMode ? 'dark:bg-gray-700 dark:border-gray-600' : ''}`}
+                placeholder={tempoUnidade === 'horas' ? "Horas" : "Minutos"}
+              />
+              <select
+                value={tempoUnidade}
+                onChange={(e) => setTempoUnidade(e.target.value)}
+                className={`mt-1 p-2 w-1/2 border rounded-md ml-2 ${darkMode ? 'dark:bg-gray-700 dark:border-gray-600' : ''}`}
+              >
+                <option value="horas">Horas</option>
+                <option value="minutos">Minutos</option>
+              </select>
+              {tempoUnidade === 'minutos' && minutos && (
+                <p className="ml-2 text-sm text-gray-600">
+                  {`(${Number(minutos) / 60} horas)`}
+                </p>
+              )}
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center mb-1">
+              <FaCalendarAlt className="mr-2 text-gray-500" />
+              <label htmlFor="dias" className="block text-sm font-medium text-gray-700">Dias de Uso no Mês:</label>
+            </div>
             <input
               type="number"
+              id="dias"
               value={dias}
               onChange={(e) => setDias(e.target.value)}
-              className="mt-1 p-2 w-full border rounded-md"
+              className={`mt-1 p-2 w-full border rounded-md ${darkMode ? 'dark:bg-gray-700 dark:border-gray-600' : ''}`}
+              placeholder="Ex: 30"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Preço do kWh (R$):</label>
+            <div className="flex items-center mb-1">
+              <FaMoneyBillWave className="mr-2 text-gray-500" />
+              <label htmlFor="precoKwh" className="block text-sm font-medium text-gray-700">Preço do kWh (R$):</label>
+            </div>
             <input
               type="text"
+              id="precoKwh"
               value={precoKwh}
               onChange={(e) => {
                 const value = e.target.value.replace(/[^0-9.]/g, '');
@@ -99,21 +150,20 @@ export default function Home() {
                 }
                 setPrecoKwh(value);
               }}
-              className="mt-1 p-2 w-full border rounded-md"
+              className={`mt-1 p-2 w-full border rounded-md ${darkMode ? 'dark:bg-gray-700 dark:border-gray-600' : ''}`}
+              placeholder="Ex: 0.50"
             />
           </div>
           <button
             onClick={calcularGasto}
-            className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+            className={`w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 ${darkMode ? 'dark:bg-blue-600 dark:hover:bg-blue-700' : ''}`}
           >
             Calcular
           </button>
           {resultado !== null && (
             <div className="mt-4 text-center">
-              <p className="font-semibold">Gasto de Energia Mensal:</p>
-              <p>{resultado} kWh</p>
-              <p className="font-semibold">Custo Total Mensal:</p>
-              <p>{custoTotal}</p>
+              <p className="font-semibold">Gasto de Energia Mensal:</p>              <p className="text-xl">{resultado} kWh</p>
+              {custoTotal && <p className="font-semibold">Custo Total: {custoTotal}</p>}
             </div>
           )}
         </div>
