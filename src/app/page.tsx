@@ -3,18 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { FaBolt, FaClock, FaCalendarAlt, FaMoneyBillWave, FaSun, FaMoon } from 'react-icons/fa';
 
 export default function Home() {
-  const [potencia, setPotencia] = useState('');
-  const [horas, setHoras] = useState('');
-  const [minutos, setMinutos] = useState('');
-  const [dias, setDias] = useState('');
-  const [precoKwh, setPrecoKwh] = useState('');
-  const [resultado, setResultado] = useState(null);
-  const [custoTotal, setCustoTotal] = useState(null);
-  const [erro, setErro] = useState(null);
-  const [tempoUnidade, setTempoUnidade] = useState('horas');
-  const [darkMode, setDarkMode] = useState(false);
+  // Ajuste os tipos para corresponder aos valores que você armazena
+  const [potencia, setPotencia] = useState<string>('');
+  const [horas, setHoras] = useState<string>('');
+  const [minutos, setMinutos] = useState<string>('');
+  const [dias, setDias] = useState<string>('');
+  const [precoKwh, setPrecoKwh] = useState<string>('');
+  const [resultado, setResultado] = useState<number | null>(null);
+  const [custoTotal, setCustoTotal] = useState<string | null>(null);
+  const [erro, setErro] = useState<string | null>(null);
+  const [tempoUnidade, setTempoUnidade] = useState<'horas' | 'minutos'>('horas');
+  const [darkMode, setDarkMode] = useState<boolean>(false);
 
   useEffect(() => {
+    // Preferência do tema com base no localStorage e no sistema
     if (
       localStorage.theme === 'dark' ||
       (!('theme' in localStorage) &&
@@ -37,6 +39,7 @@ export default function Home() {
   }, [darkMode]);
 
   const calcularGasto = () => {
+    // Verifica se os campos obrigatórios estão preenchidos
     if (
       !potencia ||
       !dias ||
@@ -50,15 +53,24 @@ export default function Home() {
       return;
     }
 
+    // Converte strings para números
     const potenciaNum = parseFloat(potencia.replace(',', '.'));
     const diasNum = parseFloat(dias.replace(',', '.'));
     const precoKwhNum = parseFloat(precoKwh.replace(',', '.'));
+
+    // Validação adicional (caso sejam strings vazias ou algo que não é número)
+    if (isNaN(potenciaNum) || isNaN(diasNum) || isNaN(precoKwhNum)) {
+      setErro('Por favor, insira números válidos em todos os campos.');
+      setResultado(null);
+      setCustoTotal(null);
+      return;
+    }
 
     let tempoTotalHoras = 0;
 
     if (tempoUnidade === 'horas') {
       const horasNum = parseFloat(horas.replace(',', '.'));
-      if (isNaN(potenciaNum) || isNaN(horasNum) || isNaN(diasNum) || isNaN(precoKwhNum)) {
+      if (isNaN(horasNum)) {
         setErro('Por favor, insira números válidos em todos os campos.');
         setResultado(null);
         setCustoTotal(null);
@@ -67,7 +79,7 @@ export default function Home() {
       tempoTotalHoras = horasNum;
     } else {
       const minutosNum = parseFloat(minutos.replace(',', '.'));
-      if (isNaN(potenciaNum) || isNaN(minutosNum) || isNaN(diasNum) || isNaN(precoKwhNum)) {
+      if (isNaN(minutosNum)) {
         setErro('Por favor, insira números válidos em todos os campos.');
         setResultado(null);
         setCustoTotal(null);
@@ -76,14 +88,21 @@ export default function Home() {
       tempoTotalHoras = minutosNum / 60;
     }
 
+    // Se chegou até aqui, não há erro
     setErro(null);
-    const consumo = (potenciaNum * tempoTotalHoras * diasNum) / 1000;
+
+    // Cálculo do consumo e custo
+    const consumo = (potenciaNum * tempoTotalHoras * diasNum) / 1000; // em kWh
     const custo = consumo * precoKwhNum;
+
+    // Armazena resultados
     setResultado(parseFloat(consumo.toFixed(2)));
-    setCustoTotal(custo.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }));
+    setCustoTotal(
+      custo.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      })
+    );
   };
 
   return (
@@ -114,7 +133,10 @@ export default function Home() {
           <div>
             <div className="flex items-center mb-1">
               <FaBolt className="mr-2 text-gray-500" />
-              <label htmlFor="potencia" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="potencia"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Potência (Watts):
               </label>
             </div>
@@ -132,7 +154,10 @@ export default function Home() {
           <div>
             <div className="flex items-center mb-1">
               <FaClock className="mr-2 text-gray-500" />
-              <label htmlFor="tempoUso" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="tempoUso"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Tempo de Uso:
               </label>
             </div>
@@ -155,7 +180,7 @@ export default function Home() {
               />
               <select
                 value={tempoUnidade}
-                onChange={(e) => setTempoUnidade(e.target.value)}
+                onChange={(e) => setTempoUnidade(e.target.value as 'horas' | 'minutos')}
                 className={`mt-1 p-2 w-1/2 border rounded-md ml-2 ${
                   darkMode ? 'dark:bg-gray-700 dark:border-gray-600' : ''
                 }`}
@@ -173,7 +198,10 @@ export default function Home() {
           <div>
             <div className="flex items-center mb-1">
               <FaCalendarAlt className="mr-2 text-gray-500" />
-              <label htmlFor="dias" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="dias"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Dias de Uso no Mês:
               </label>
             </div>
@@ -191,7 +219,10 @@ export default function Home() {
           <div>
             <div className="flex items-center mb-1">
               <FaMoneyBillWave className="mr-2 text-gray-500" />
-              <label htmlFor="precoKwh" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="precoKwh"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Preço do kWh (R$):
               </label>
             </div>
