@@ -190,7 +190,7 @@ export default function Home() {
               </select>
               {tempoUnidade === 'minutos' && minutos && (
                 <p className="ml-2 text-sm text-gray-600">
-                  {`(${Number(minutos) / 60} horas)`}
+                  
                 </p>
               )}
             </div>
