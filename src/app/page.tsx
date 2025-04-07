@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { FaBolt, FaClock, FaCalendarAlt, FaMoneyBillWave, FaSun, FaMoon } from 'react-icons/fa';
 
 export default function Home() {
-  // Ajuste os tipos para corresponder aos valores que você salva / armazena
   const [potencia, setPotencia] = useState<string>('');
   const [horas, setHoras] = useState<string>('');
   const [minutos, setMinutos] = useState<string>('');
@@ -16,7 +15,6 @@ export default function Home() {
   const [darkMode, setDarkMode] = useState<boolean>(false);
 
   useEffect(() => {
-    // Preferência do tema com base no localStorage e no sistema
     if (
       localStorage.theme === 'dark' ||
       (!('theme' in localStorage) &&
@@ -39,7 +37,6 @@ export default function Home() {
   }, [darkMode]);
 
   const calcularGasto = () => {
-    // Verifica se os campos obrigatórios estão preenchidos
     if (
       !potencia ||
       !dias ||
@@ -53,12 +50,10 @@ export default function Home() {
       return;
     }
 
-    // Converte strings para números
     const potenciaNum = parseFloat(potencia.replace(',', '.'));
     const diasNum = parseFloat(dias.replace(',', '.'));
     const precoKwhNum = parseFloat(precoKwh.replace(',', '.'));
 
-    // Validação adicional (caso sejam strings vazias ou algo que não é número)
     if (isNaN(potenciaNum) || isNaN(diasNum) || isNaN(precoKwhNum)) {
       setErro('Por favor, insira números válidos em todos os campos.');
       setResultado(null);
@@ -88,14 +83,11 @@ export default function Home() {
       tempoTotalHoras = minutosNum / 60;
     }
 
-    // Se chegou até aqui, não há erro
     setErro(null);
 
-    // Cálculo do consumo e custo
     const consumo = (potenciaNum * tempoTotalHoras * diasNum) / 1000; // em kWh
     const custo = consumo * precoKwhNum;
 
-    // Armazena resultados
     setResultado(parseFloat(consumo.toFixed(2)));
     setCustoTotal(
       custo.toLocaleString('pt-BR', {
